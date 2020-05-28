@@ -1,0 +1,47 @@
+library:
+  source-dirs: src
+tests:
+  send-email-test:
+    source-dirs: test
+    main: Spec.hs
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - send-email
+copyright: 2020 Aleksey Danilevsky
+maintainer: alexey.danilevsky@gmail.com
+dependencies:
+  - aeson
+  - base >= 4.7 && < 5
+  - HaskellNet
+  - HaskellNet-SSL
+  - http-types
+  - listsafe
+  - mime-mail
+  - utf8-string
+  - regex-compat
+  - text
+  - wai
+  - wai-extra
+  - warp
+name: send-email
+version: 0.1.0.0
+extra-source-files:
+  - README.md
+  - ChangeLog.md
+author: Aleksey Danilevsky
+github: githubuser/send-email
+license: BSD3
+executables:
+  send-email:
+    source-dirs: app
+    main: Main.hs
+    ghc-options:
+      - -threaded
+      - -rtsopts
+      - -with-rtsopts=-N
+    dependencies:
+      - send-email
+description: Please see the README on GitHub at <https://github.com/githubuser/send-email#readme>
