@@ -17,4 +17,7 @@ variables:
 build:
   extends: .build_job
   script:
-    - echo $CI_REGISTRY_IMAGE
+    - docker build --no-cache -t $CI_REGISTRY_IMAGE:latest .
+    - docker push $CI_REGISTRY_IMAGE:latest
+  only:
+    - master
