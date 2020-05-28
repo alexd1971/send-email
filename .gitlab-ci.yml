@@ -1,0 +1,20 @@
+stages:
+  - build
+
+variables:
+  PROJECT_PATH: devopsafs/afs/afs_b2b_api
+  IMAGE_NAME: $CI_REGISTRY/$PROJECT_PATH
+
+.build_job:
+  stage: build
+  before_script:
+    - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+  after_script:
+    - docker image prune -a -f
+  tags:
+    - hz-afs
+
+build:
+  extends: .build_job
+  script:
+    - echo $CI_REGISTRY_IMAGE
