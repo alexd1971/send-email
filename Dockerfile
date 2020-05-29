@@ -1,17 +1,16 @@
-FROM debian:10.4-slim as build
+FROM alpine as build
 
 WORKDIR /tmp/build
-RUN apt-get update
-RUN apt-get install -y curl
+RUN apk add curl ghc=~8.6.5 musl-dev zlib-dev
 RUN curl -sSL https://get.haskellstack.org/ | sh
 COPY . /tmp/build/
 
-RUN stack build --copy-bins
+RUN stack build --system-ghc --copy-bins
 
-FROM debian:10.4-slim as app
+FROM alpine as app
 RUN mkdir -p /opt/app
 WORKDIR /opt/app
-RUN apt-get update && apt-get install -y netbase ca-certificates && apt-get autoremove && apt-get clean
+RUN apk add --no-cache gmp libffi ca-certificates
 
 COPY --from=build /root/.local/bin/send-email .
 EXPOSE 7777
