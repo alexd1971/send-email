@@ -1,0 +1,4 @@
+server: "smtp.gmail.com"
+tlsPort: 587
+login: "no-reply@email.com"
+password: "very-secret-password"

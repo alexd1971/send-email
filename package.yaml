@@ -13,6 +13,7 @@ tests:
 copyright: 2020 Aleksey Danilevsky
 maintainer: alexey.danilevsky@gmail.com
 dependencies:
+  - hspec
   - aeson
   - base >= 4.7 && < 5
   - HaskellNet
@@ -20,12 +21,15 @@ dependencies:
   - http-types
   - listsafe
   - mime-mail
-  - utf8-string
+  - mtl
+  - network
   - regex-compat
   - text
+  - utf8-string
   - wai
   - wai-extra
   - warp
+  - yaml
 name: send-email
 version: 0.1.0.0
 extra-source-files:

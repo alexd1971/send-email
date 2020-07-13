@@ -2,17 +2,32 @@
 
 module Main where
 
+import           Data.Yaml                      ( ParseException
+                                                , decodeFileEither
+                                                )
 import           Network.Wai.Handler.Warp       ( run )
 
-import           RequestHandler                 ( handler )
-import           System.IO                      ( hSetBuffering
+import           Control.Monad.Reader
+import           RequestHandler                 ( mkApplication )
+import           System.IO                      ( BufferMode(NoBuffering)
+                                                , hSetBuffering
                                                 , stdout
-                                                , BufferMode(NoBuffering)
                                                 )
+
+import           Config
 
 main :: IO ()
 main = do
-    let port = 7777
-    hSetBuffering stdout NoBuffering
-    putStrLn $ "Listening on port " ++ show port
-    run port handler
+  hSetBuffering stdout NoBuffering
+  parsedConfig <-
+    decodeFileEither "config.yaml" :: IO (Either ParseException Config)
+  case parsedConfig of
+    Left  exception -> print exception
+    Right config    -> runReaderT startServer config
+
+startServer :: ConfigReader ()
+startServer = do
+  let port = 7777
+  application <- mkApplication
+  lift $ putStrLn $ "Listening on port " ++ show port
+  lift $ run port $ application
