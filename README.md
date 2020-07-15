@@ -4,14 +4,16 @@
 
 ## Запуск сервиса
 
+Создать конфигурационный файл `config.yaml` по образцу из `config-sample.yaml`
+
 ```
-docker run -d --name=send-email <image-name:tag>
+docker run -d --name=send-email -v /path/to/config.yaml:/opt/app/config.yaml <image-name:tag>
 ```
 
 Для локального использования необходимо пробросить порт 7777 на хост:
 
 ```
-docker run -d --name=send-email -p <port>:7777 <image-name:tag>
+docker run -d --name=send-email -v /path/to/config.yaml:/opt/app/config.yaml -p <port>:7777 <image-name:tag>
 ```
 
 ## Отправка сообщения
