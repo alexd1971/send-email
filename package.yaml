@@ -24,6 +24,7 @@ dependencies:
   - mtl
   - network
   - regex-compat
+  - split
   - text
   - utf8-string
   - wai

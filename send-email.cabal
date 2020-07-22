@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 97627c1f70d9ac2f242ddb29deabed946913e3137dc85f5ef6cb92f9b93f6b96
+-- hash: 8964d7085d897b18981e8c21f8b12197bbada4c0f63a06a10e18451f3c1c1da9
 
 name:           send-email
 version:        0.1.0.0
@@ -46,6 +46,7 @@ library
     , mtl
     , network
     , regex-compat
+    , split
     , text
     , utf8-string
     , wai
@@ -74,6 +75,7 @@ executable send-email
     , network
     , regex-compat
     , send-email
+    , split
     , text
     , utf8-string
     , wai
@@ -104,6 +106,7 @@ test-suite send-email-test
     , network
     , regex-compat
     , send-email
+    , split
     , text
     , utf8-string
     , wai

@@ -15,8 +15,10 @@ import           Data.Aeson                     ( FromJSON
 import           Data.ByteString.Lazy.UTF8      ( ByteString )
 import           Data.ByteString.UTF8           ( toString )
 import           Data.List                      ( isPrefixOf )
+import           Data.List.Split
 import           Data.Text                      ( Text
                                                 , pack
+                                                , strip
                                                 )
 import           Data.Text.Encoding            as T
                                                 ( decodeUtf8 )
@@ -34,7 +36,6 @@ import           Network.Wai.Parse              ( FileInfo
                                                 , fileContentType
                                                 , fileName
                                                 )
-import           Text.Regex
 
 -- | Данные сообщения, полученные из MultiPart HTTP-запроса
 -- Представляют собой список частей запроса
@@ -114,27 +115,16 @@ isHtmlPartData :: PartData -> Bool
 isHtmlPartData fileInfo =
   "text/html" `isPrefixOf` toString (fileContentType fileInfo)
 
--- | Регулярное выражения для выделения из строки имени и электроного адреса
--- Строка должна иметь вид: "User Name<user@email.com>"
-emailRegex :: Regex
-emailRegex = mkRegex "^(.*)?<(.+)>$"
-
 -- | Создает адрес из строковых значений имени и электронного адреса
-addressFromParts :: (String, String) -> Address
-addressFromParts (name, email) =
-  let maybeName = if null name then Nothing else Just $ pack name
-  in  Address maybeName $ pack email
-
-list2Tuple :: [a] -> Maybe (a, a)
-list2Tuple list = case list of
-  [x, y] -> Just (x, y)
-  _      -> Nothing
+addressFromParts :: [Text] -> Maybe Address
+addressFromParts []                    = Nothing
+addressFromParts (address        : []) = Just $ Address Nothing address
+addressFromParts (name : address : _ ) = Just $ Address (Just name) (address)
 
 -- | Создает адрес из строки адреса
 addressFromString :: String -> Maybe Address
-addressFromString string = do
-  addressParts <- matchRegex emailRegex string >>= list2Tuple
-  return $ addressFromParts addressParts
+addressFromString string =
+  addressFromParts $ take 2 $ map (strip . pack) $ splitOneOf "<>" string
 
 -- | Создает электронное сообщение на основе данных HTTP-запроса
 -- Результирующее сообщение не содержит вложений. Их нужно добавлять отдельно.
