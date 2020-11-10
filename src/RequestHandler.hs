@@ -27,6 +27,7 @@ import           Network.Wai                    ( Application
                                                 , Response
                                                 , ResponseReceived
                                                 , responseLBS
+                                                , remoteHost
                                                 )
 import           Network.Wai.Parse              ( lbsBackEnd
                                                 , parseRequestBody
@@ -35,7 +36,10 @@ import           Network.Wai.Parse              ( lbsBackEnd
 import           Config
 import           EmailBuilder                   ( attachments
                                                 , mkMail
+                                                , senderEmail
+                                                , rcptEmail
                                                 )
+import           Logs
 
 -- | Формирует ответ сервера
 --
@@ -56,19 +60,35 @@ sendEmail email = do
       smtpLogin    = login config
       smtpPassword = password config
       port         = fromInteger $ tlsPort config
+  lift
+    .  logInfo
+    $  "Connecting to "
+    <> smtpServer
+    <> " on port "
+    <> show port
+    <> "..."
   smtpConnection <- lift
     (connectSMTPSTARTTLSWithSettings
       smtpServer
       defaultSettingsSMTPSTARTTLS { sslPort = port }
     )
+  lift . logInfo $ "...connected"
+  lift . logInfo $ "Authentication..."
   authenticated <- lift
     $ authenticate LOGIN smtpLogin smtpPassword smtpConnection
   if authenticated
     then do
-      lift $ sendMimeMail2 email smtpConnection
-      lift $ closeSMTP smtpConnection
+      lift . logInfo $ "...success"
+      lift . logInfo $ "Sending email..."
+      lift . sendMimeMail2 email $ smtpConnection
+      lift . logInfo $ "...success"
+      lift . logInfo $ "Closing connection..."
+      lift . closeSMTP $ smtpConnection
+      lift . logInfo $ "...closed"
       return $ Right ()
-    else return $ Left "SMTP Authentication error"
+    else do
+      lift . logError $ "...fail"
+      return $ Left "SMTP Authentication error"
 
 -- | Обрабатывает запрос к серверу
 --
@@ -77,16 +97,32 @@ sendEmail email = do
 -- * Формирует и возвращает ответ клиенту по результатам отправки сообщения
 handleRequest :: Request -> Responder -> ConfigReader ResponseReceived
 handleRequest request responder = do
+  lift . logInfo $ "Recieved request from " <> (show . remoteHost) request
   mailData <-
     (snd <$>) <$> (snd <$> (lift (parseRequestBody lbsBackEnd request)))
   case mkMail mailData of
-    Nothing -> lift . responder $ mkResponse status400 "Bad request"
-    Just e  -> do
-      let email = addAttachmentsBS (attachments $ tail mailData) e
+    Nothing -> do
+      lift . logError $ "Bad request"
+      lift . responder $ mkResponse status400 "Bad request"
+    Just e -> do
+      let email  = addAttachmentsBS (attachments $ tail mailData) e
+          sender = senderEmail email
+          rcpt   = rcptEmail email
+      lift . logInfo $ "Sending email from " <> sender <> " to " <> rcpt
       result <- sendEmail email
       case result of
-        Right ()      -> lift . responder $ mkResponse status200 "Ok"
-        Left  message -> lift . responder $ mkResponse status500 message
+        Right () -> do
+          lift
+            .  logInfo
+            $  "Email from "
+            <> sender
+            <> " to "
+            <> rcpt
+            <> " sent successfully"
+          lift . responder $ mkResponse status200 "Ok"
+        Left message -> do
+          lift . logError $ message
+          lift . responder $ mkResponse status500 message
 
 -- | Создает обработчик запросов сервера
 mkApplication :: ConfigReader Application

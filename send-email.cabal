@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 8964d7085d897b18981e8c21f8b12197bbada4c0f63a06a10e18451f3c1c1da9
+-- hash: 477840219bb5c3985f90a81c2a5d8096dd0655e15d026d2f52cf345331ab70ca
 
 name:           send-email
 version:        0.1.0.0
@@ -29,6 +29,7 @@ library
   exposed-modules:
       Config
       EmailBuilder
+      Logs
       RequestHandler
   other-modules:
       Paths_send_email
@@ -39,6 +40,7 @@ library
     , HaskellNet-SSL
     , aeson
     , base >=4.7 && <5
+    , hslogger
     , hspec
     , http-types
     , listsafe
@@ -67,6 +69,7 @@ executable send-email
     , HaskellNet-SSL
     , aeson
     , base >=4.7 && <5
+    , hslogger
     , hspec
     , http-types
     , listsafe
@@ -98,6 +101,7 @@ test-suite send-email-test
     , HaskellNet-SSL
     , aeson
     , base >=4.7 && <5
+    , hslogger
     , hspec
     , http-types
     , listsafe
