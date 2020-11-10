@@ -1,3 +1,4 @@
 # Changelog for send-email
 
-## Unreleased changes
+## 1.0.0.0
+- Initial version
