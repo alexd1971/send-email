@@ -14,10 +14,13 @@ import           Data.Aeson                     ( FromJSON
                                                 )
 import           Data.ByteString.Lazy.UTF8      ( ByteString )
 import           Data.ByteString.UTF8           ( toString )
-import           Data.List                      ( isPrefixOf )
+import           Data.List                      ( isPrefixOf
+                                                , intercalate
+                                                )
 import           Data.List.Split
 import           Data.Text                      ( Text
                                                 , pack
+                                                , unpack
                                                 , strip
                                                 )
 import           Data.Text.Encoding            as T
@@ -25,9 +28,9 @@ import           Data.Text.Encoding            as T
 import           Data.Text.Lazy.Encoding       as TLazy
                                                 ( decodeUtf8 )
 import           GHC.Generics                   ( Generic )
-import           Network.Mail.Mime              ( Address(Address)
+import           Network.Mail.Mime              ( Address(Address, addressEmail)
                                                 , Alternatives
-                                                , Mail(Mail)
+                                                , Mail(Mail, mailFrom, mailTo)
                                                 , htmlPart
                                                 , plainPart
                                                 )
@@ -143,3 +146,9 @@ mkMail emailData = case emailData of
                   mailBcc
                   [("subject", pack $ subject headers)]
                   [mkMailBody bodyData]
+
+senderEmail :: Mail -> String
+senderEmail = unpack . addressEmail . mailFrom
+
+rcptEmail :: Mail -> String
+rcptEmail = intercalate ", " . map (unpack . addressEmail) . mailTo

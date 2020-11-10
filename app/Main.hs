@@ -15,19 +15,25 @@ import           System.IO                      ( BufferMode(NoBuffering)
                                                 )
 
 import           Config
+import           Logs
 
 main :: IO ()
 main = do
   hSetBuffering stdout NoBuffering
+  setupLogger
+  logInfo "Reading config..."
   parsedConfig <-
     decodeFileEither "config.yaml" :: IO (Either ParseException Config)
   case parsedConfig of
-    Left  exception -> print exception
-    Right config    -> runReaderT startServer config
+    Left  exception -> logError $ "Config error: " <> show exception
+    Right config    -> do
+      logInfo "...success"
+      logInfo "Starting service..."
+      runReaderT startServer config
 
 startServer :: ConfigReader ()
 startServer = do
   let port = 7777
   application <- mkApplication
-  lift $ putStrLn $ "Listening on port " ++ show port
-  lift $ run port $ application
+  lift . logInfo $ "...started on port " <> show port
+  lift . run port $ application
