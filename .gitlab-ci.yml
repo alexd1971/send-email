@@ -1,3 +1,6 @@
+variables:
+  LATEST: "1.0"
+
 stages:
   - build
 
@@ -10,10 +13,35 @@ stages:
   tags:
     - hz-afs
 
-build:
+build_dev:
   extends: .build_job
   script:
+    - echo 'build dev'
+    - docker build --no-cache -t $CI_REGISTRY_IMAGE:dev .
+    - docker push $CI_REGISTRY_IMAGE:dev
+  only:
+    - master
+
+build_latest:
+  extends: .build_job
+  script:
+    - echo 'build latest'
     - docker build --no-cache -t $CI_REGISTRY_IMAGE:latest .
     - docker push $CI_REGISTRY_IMAGE:latest
   only:
-    - master
+    variables:
+      - $CI_COMMIT_REF_NAME == $LATEST
+  except:
+    - tags
+
+build_tag:
+  extends: .build_job
+  script:
+    - echo 'build' $CI_COMMIT_TAG
+    - docker build --no-cache -t $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG .
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_TAG
+  only:
+    - tags
+  except:
+    - branches
+
