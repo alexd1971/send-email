@@ -36,8 +36,9 @@ import           Network.Wai.Parse              ( lbsBackEnd
 import           Config
 import           EmailBuilder                   ( attachments
                                                 , mkMail
-                                                , senderEmail
-                                                , rcptEmail
+                                                , emailSender
+                                                , emailRcpt
+                                                , emailSubject
                                                 )
 import           Logs
 
@@ -105,10 +106,18 @@ handleRequest request responder = do
       lift . logError $ "Bad request"
       lift . responder $ mkResponse status400 "Bad request"
     Just e -> do
-      let email  = addAttachmentsBS (attachments $ tail mailData) e
-          sender = senderEmail email
-          rcpt   = rcptEmail email
-      lift . logInfo $ "Sending email from " <> sender <> " to " <> rcpt
+      let email   = addAttachmentsBS (attachments $ tail mailData) e
+          sender  = emailSender email
+          rcpt    = emailRcpt email
+          subject = emailSubject email
+      lift
+        .  logInfo
+        $  "Sending \""
+        <> subject
+        <> "\" from "
+        <> sender
+        <> " to "
+        <> rcpt
       result <- sendEmail email
       case result of
         Right () -> do

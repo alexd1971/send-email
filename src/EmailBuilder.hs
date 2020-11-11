@@ -33,6 +33,7 @@ import           Network.Mail.Mime              ( Address(Address, addressEmail)
                                                 , Mail(Mail, mailFrom, mailTo)
                                                 , htmlPart
                                                 , plainPart
+                                                , mailHeaders
                                                 )
 import           Network.Wai.Parse              ( FileInfo
                                                 , fileContent
@@ -147,8 +148,15 @@ mkMail emailData = case emailData of
                   [("subject", pack $ subject headers)]
                   [mkMailBody bodyData]
 
-senderEmail :: Mail -> String
-senderEmail = unpack . addressEmail . mailFrom
+emailSender :: Mail -> String
+emailSender = unpack . addressEmail . mailFrom
 
-rcptEmail :: Mail -> String
-rcptEmail = intercalate ", " . map (unpack . addressEmail) . mailTo
+emailRcpt :: Mail -> String
+emailRcpt = intercalate ", " . map (unpack . addressEmail) . mailTo
+
+emailSubject :: Mail -> String
+emailSubject mail =
+  let maybeSubject = lookup "subject" . mailHeaders $ mail
+  in  case maybeSubject of
+        Nothing      -> ""
+        Just subject -> unpack subject
