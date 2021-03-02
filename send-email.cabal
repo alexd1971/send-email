@@ -4,10 +4,10 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: 477840219bb5c3985f90a81c2a5d8096dd0655e15d026d2f52cf345331ab70ca
+-- hash: 59df43c6f9f1ad4ea0e715c2b8c16f749d044b12439d46125b550a71de5e7432
 
 name:           send-email
-version:        0.1.0.0
+version:        1.1.0.0
 description:    Please see the README on GitHub at <https://github.com/githubuser/send-email#readme>
 homepage:       https://github.com/githubuser/send-email#readme
 bug-reports:    https://github.com/githubuser/send-email/issues
